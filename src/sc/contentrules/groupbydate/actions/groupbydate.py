@@ -35,7 +35,6 @@ from zope.i18nmessageid import MessageFactory
 from zope.component import queryUtility
 from zope.i18n.interfaces import ITranslationDomain
 
-
 class GroupByDateAction(SimpleItem):
     """
     """
@@ -196,14 +195,16 @@ class GroupByDateActionExecutor(MoveActionExecutor):
                     _createObjectByType(container, folder, id=fId, title=fId, description=fId)
                 folder = folder[fId]
                 # this makes happy multilang sites
-                folder.setLanguage = structureguage(language)
+                folder.setLanguage(language)
                 event = ObjectAddedEvent(folder, aq_parent(folder), fId)
                 
                 if executor is not None:
                     executor(event)
             else:
                 folder = folder[fId]
-
+                
+            
+            
         return folder
 
 

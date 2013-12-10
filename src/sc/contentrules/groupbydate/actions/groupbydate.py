@@ -196,7 +196,7 @@ class GroupByDateActionExecutor(MoveActionExecutor):
                     _createObjectByType(container, folder, id=fId, title=fId, description=fId)
                 folder = folder[fId]
                 # this makes happy multilang sites
-                folder.setLan dateFormat = structureguage(language)
+                folder.setLanguage = structureguage(language)
                 event = ObjectAddedEvent(folder, aq_parent(folder), fId)
                 
                 if executor is not None:

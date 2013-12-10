@@ -31,6 +31,9 @@ from sc.contentrules.groupbydate.interfaces import IGroupByDateAction
 from sc.contentrules.groupbydate.events import ObjectGroupedByDate
 
 from sc.contentrules.groupbydate import MessageFactory as _
+from zope.i18nmessageid import MessageFactory
+from zope.component import queryUtility
+from zope.i18n.interfaces import ITranslationDomain
 
 
 class GroupByDateAction(SimpleItem):
@@ -166,15 +169,18 @@ class GroupByDateActionExecutor(MoveActionExecutor):
     def _createFolderStructure(self, folder, structure='ymd', date=None):
         ''' Create a folder structure and then return our innermost folder
         '''
+
+        translation = getToolByName(self.context, 'translation_service')
+        PLMF = MessageFactory('plonelocales')
+        util = queryUtility(ITranslationDomain, 'plonelocales')
+        month = DateTime().month()
+        pw = getToolByName(self.context, 'portal_workflow')
+        publica = pw.doActionFor
         if not date:
             date = DateTime()
-
         dateFormat = structure
-
         date = date.strftime(dateFormat)
-
         folderStructure = [str(p) for p in date.split('/')]
-
         container = self.element.container
         language = folder.Language()
         # We run IRuleExecutor here to make sure other rules will be
@@ -182,16 +188,22 @@ class GroupByDateActionExecutor(MoveActionExecutor):
         executor = IRuleExecutor(self.context, None)
         for fId in folderStructure:
             if not fId in folder.objectIds():
-                _createObjectByType(container, folder, id=fId,
-                                    title=fId, description=fId)
+                if int(fId) <= 12:
+                    monthName = PLMF(translation.month_msgid(fId), default=translation.month_english(fId))
+                    mes = util.translate(monthName, target_language='pt_BR', default=_(translation.month_english(month)))
+                    _createObjectByType(container, folder, id=fId, title=mes, description=fId)
+                else:
+                    _createObjectByType(container, folder, id=fId, title=fId, description=fId)
                 folder = folder[fId]
                 # this makes happy multilang sites
-                folder.setLanguage(language)
+                folder.setLan dateFormat = structureguage(language)
                 event = ObjectAddedEvent(folder, aq_parent(folder), fId)
+                
                 if executor is not None:
                     executor(event)
             else:
                 folder = folder[fId]
+
         return folder
 
 
